@@ -29,7 +29,7 @@ const Hero = () => {
             size="lg"
             className="relative overflow-hidden bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-glow group"
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 animate-shimmer" />
+            <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 animate-shimmer" />
             <span className="relative flex items-center">
               View Menu
               <ArrowRight className="ml-2 h-5 w-5" />
