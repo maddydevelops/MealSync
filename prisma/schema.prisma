@@ -1,0 +1,262 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(uuid())
+  first_name    String
+  last_name     String
+  email         String         @unique
+  phone_number  String
+  password      String
+  role          Role           @default(customer)
+  is_active     Boolean        @default(true)
+  is_blocked    Boolean        @default(false)
+  address       String?
+  city          String?
+  country       String?
+  cnic          String?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @default(now()) @updatedAt
+  company_name  String?
+
+  // Relations
+  restaurants   Restaurant[]   @relation("owner_restaurants")
+  orders        Order[]
+  invoices      Invoice[]
+  is_deleted    Boolean        @default(false)
+
+  created_subscriptions Subscription[] @relation("superadmin_created_subscriptions")
+  owned_subscription    Subscription?  @relation("owner_assigned_subscription")
+
+  OTP OTP[]
+
+  announcements Announcement[]
+}
+
+model Subscription {
+  id            String     @id @default(uuid())
+  name          String
+  price         Float
+  duration      Int        // Duration in days
+  itemsAllowed  Int
+  status        String     @default("active")
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now()) @updatedAt
+  is_deleted    Boolean    @default(false)
+
+  created_by_id String?
+  created_by    User?       @relation("superadmin_created_subscriptions", fields: [created_by_id], references: [id])
+
+  owner_id      String?     @unique
+  owner         User?       @relation("owner_assigned_subscription", fields: [owner_id], references: [id])
+
+  restaurants   Restaurant[]
+}
+
+model Restaurant {
+  id              String        @id @default(uuid())
+  name            String
+  description     String?
+  address         String
+  city            String
+  country         String
+  owner_id        String
+  is_active       Boolean       @default(true)
+  created_at      DateTime      @default(now())
+  updated_at      DateTime      @default(now()) @updatedAt
+  is_deleted      Boolean       @default(false)
+
+  owner           User          @relation("owner_restaurants", fields: [owner_id], references: [id])
+  menu_items      MenuItem[]
+  orders          Order[]
+
+  subscription_id String?
+  subscription    Subscription? @relation(fields: [subscription_id], references: [id])
+
+  categories Category[]
+}
+
+// Extended MenuItem for Owner Products
+
+model MenuItem {
+  id            String     @id @default(uuid())
+  restaurant_id String
+  name          String
+  description   String?
+  price         Float
+  category_id   String?    // FK to Category
+  category      Category?  @relation(fields: [category_id], references: [id])
+  stock         Int        @default(0)
+  total_sold    Int        @default(0)
+  rating        Float?     @default(0)
+  return_policy String?
+  images        String[]   // Array of image URLs
+  is_available  Boolean    @default(true)
+  is_deleted    Boolean    @default(false)
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @default(now()) @updatedAt
+
+  restaurant    Restaurant @relation(fields: [restaurant_id], references: [id])
+  order_items   OrderItem[]
+}
+
+
+
+model Order {
+  id            String      @id @default(uuid())
+  user_id       String
+  restaurant_id String
+  total_amount  Float
+  status        OrderStatus @default(pending)
+  placed_at     DateTime    @default(now())
+  delivered_at  DateTime?
+  created_at    DateTime    @default(now())
+  updated_at    DateTime    @default(now()) @updatedAt
+  is_deleted    Boolean     @default(false)
+
+  user          User        @relation(fields: [user_id], references: [id])
+  restaurant    Restaurant  @relation(fields: [restaurant_id], references: [id])
+  items         OrderItem[]
+  invoice       Invoice?
+  Delivery      Delivery[]
+}
+
+model OrderItem {
+  id           String   @id @default(uuid())
+  order_id     String
+  menu_item_id String
+  quantity     Int
+  price        Float
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  is_deleted   Boolean  @default(false)
+
+  order        Order    @relation(fields: [order_id], references: [id])
+  menu_item    MenuItem @relation(fields: [menu_item_id], references: [id])
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  order_id       String        @unique
+  user_id        String
+  invoice_number String        @unique
+  amount         Float
+  tax            Float         @default(0)
+  discount       Float         @default(0)
+  is_deleted     Boolean       @default(false)
+  total_amount   Float
+  status         InvoiceStatus @default(pending)
+  paid_at        DateTime?
+  created_at     DateTime      @default(now())
+  updated_at     DateTime      @default(now()) @updatedAt
+
+  order          Order         @relation(fields: [order_id], references: [id])
+  user           User          @relation(fields: [user_id], references: [id])
+}
+
+model Delivery {
+  id            String          @id @default(uuid())
+  order_id      String
+  driver_name   String?
+  status        DeliveryStatus  @default(preparing)
+  pickup_time   DateTime?
+  delivery_time DateTime?
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @default(now()) @updatedAt
+
+  order         Order           @relation(fields: [order_id], references: [id])
+}
+
+model OTP {
+  id        String   @id @default(cuid())
+  userId    String
+  code      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  created_by  String?   // optional relation to User who created it
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+  is_deleted  Boolean  @default(false)
+
+  creator     User?    @relation(fields: [created_by], references: [id])
+}
+model Notification {
+  id            String   @id @default(uuid())
+  title         String
+  message       String
+  read          Boolean  @default(false)
+  created_at    DateTime @default(now())
+}
+model Category {
+  id            String       @id @default(uuid())
+  name          String
+  restaurant_id String
+  is_active     Boolean      @default(true)
+  is_deleted    Boolean      @default(false)
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @default(now()) @updatedAt
+
+  restaurant    Restaurant   @relation(fields: [restaurant_id], references: [id])
+  menu_items    MenuItem[]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+enum Role {
+  superadmin
+  owner
+  customer
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  preparing
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum InvoiceStatus {
+  pending
+  paid
+  overdue
+  cancelled
+}
+
+enum DeliveryStatus {
+  preparing
+  picked_up
+  on_the_way
+  delivered
+  cancelled
+}

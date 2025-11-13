@@ -1,0 +1,21 @@
+services:
+  master-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        ENV: ${ENV}
+        PORT: ${PORT}
+    image: ${DOCKER_NAME}:latest
+    container_name: ${DOCKER_NAME}
+    restart: always
+    ports:
+      - "3020:3000"
+    environment:
+      - NODE_ENV=production
+      - ENV=${ENV}
+      - PORT=${PORT}
+      - HOSTNAME=0.0.0.0
+    volumes:
+      - /var/www/flextrack:/var/www/flextrack
+    command: ["node", "server.js"]
