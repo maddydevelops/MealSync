@@ -54,7 +54,7 @@ const menuItems = {
     { title: "Users", url: "/users", icon: User2 },
     { title: "Restaurants", url: "/restaurants", icon: Utensils },
     { title: "Announcement", url: "/announcement", icon: Calendar },
-    { title: "Payments", url: "/payments", icon: DollarSign },
+    { title: "chats", url: "/chats", icon: DollarSign },
     { title: "Subscriptions", url: "/subscriptions", icon: SubscriptIcon },
     { title: "Settings", url: "/settings", icon: Settings },
   ],
@@ -64,7 +64,7 @@ const menuItems = {
     { title: "Categories", url: "/owner/categories", icon: Settings },
 
     { title: "Profile", url: "/owner/profile", icon: User2 },
-    { title: "Payments", url: "/owner/payments", icon: DollarSign },
+    { title: "chats", url: "/owner/chats", icon: DollarSign },
     { title: "Settings", url: "/owner/settings", icon: Settings },
   ],
 };

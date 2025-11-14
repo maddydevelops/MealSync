@@ -213,6 +213,47 @@ model Category {
   restaurant    Restaurant   @relation(fields: [restaurant_id], references: [id])
   menu_items    MenuItem[]
 }
+model Chat {
+  id           String    @id @default(uuid())
+  productId    String
+  productName  String
+  restaurantId String
+  userName     String
+  userEmail    String
+  createdAt    DateTime  @default(now())
+  messages     Message[]
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  sender    String   // 'user' or 'restaurant'
+  content   String
+  createdAt DateTime @default(now())
+  chat      Chat     @relation(fields: [chatId], references: [id])
+}
+model ChatSession {
+  id           String   @id @default(uuid())
+  chatId       String   @unique
+  productId    String
+  productName  String
+  userName     String
+  userEmail    String
+  createdAt    DateTime @default(now())
+
+  messages     ChatMessage[]
+}
+
+model ChatMessage {
+  id          String   @id @default(uuid())
+  chatId      String
+  sender      String   // "user" or "restaurant"
+  message     String
+  timestamp   DateTime @default(now())
+
+  chatSessions ChatSession[]
+}
+
 
 
 

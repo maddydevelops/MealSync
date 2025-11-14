@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, Star, Tag, TrendingUp } from "lucide-react";
+import ChatModal from "@/components/ChatModal";
 
 interface Category {
   id: string;
@@ -30,6 +31,7 @@ const ProductsSection: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 8;
+  const [chatProduct, setChatProduct] = useState<Product | null>(null);
 
   // Fetch active categories
   const fetchCategories = async () => {
@@ -41,22 +43,24 @@ const ProductsSection: React.FC = () => {
       toast.error("Failed to load categories");
     }
   };
+  
 
   // Fetch products
-// Fetch products
-const fetchProducts = async () => {
-  try {
-    const res = await axios.get("/api/landingpage/fetchproducts"); // GET request
-    if (res.data.success) {
-      const availableProducts = res.data.products.filter((p: Product) => p.is_available);
-      setProducts(availableProducts);
+  // Fetch products
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get("/api/landingpage/fetchproducts"); // GET request
+      if (res.data.success) {
+        const availableProducts = res.data.products.filter(
+          (p: Product) => p.is_available
+        );
+        setProducts(availableProducts);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to load products");
     }
-  } catch (error) {
-    console.error(error);
-    toast.error("Failed to load products");
-  }
-};
-
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -80,7 +84,9 @@ const fetchProducts = async () => {
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-linear-to-r from-sale via-red-500 to-pink-500 text-white px-6 py-2 rounded-full mb-4 animate-pulse">
             <TrendingUp className="w-4 h-4" />
-            <span className="font-bold text-bl text-sm">HOT DEALS - LIMITED TIME</span>
+            <span className="font-bold text-bl text-sm">
+              HOT DEALS - LIMITED TIME
+            </span>
           </div>
           <h2 className="text-3xl md:text-5xl font-bold mb-3 text-gradient">
             Featured Products
@@ -98,7 +104,7 @@ const fetchProducts = async () => {
                 <Tag className="w-5 h-5 text-primary" />
                 <h3 className="font-bold text-lg">Categories</h3>
               </div>
-              
+
               <ul className="space-y-2">
                 <li>
                   <button
@@ -133,7 +139,12 @@ const fetchProducts = async () => {
                     >
                       {cat.name}
                       <span className="float-right text-sm opacity-70">
-                        ({products.filter((p) => p.category_id === cat.id).length})
+                        (
+                        {
+                          products.filter((p) => p.category_id === cat.id)
+                            .length
+                        }
+                        )
                       </span>
                     </button>
                   </li>
@@ -172,7 +183,7 @@ const fetchProducts = async () => {
                             No Image
                           </div>
                         )}
-                        
+
                         {/* Sale Badge */}
                         <div className="absolute top-3 left-3">
                           <Badge className="bg-accent text-sale-foreground font-bold shadow-lg">
@@ -183,7 +194,10 @@ const fetchProducts = async () => {
                         {/* Stock Badge */}
                         {product.stock < 10 && (
                           <div className="absolute top-3 right-3">
-                            <Badge variant="destructive" className="font-semibold">
+                            <Badge
+                              variant="destructive"
+                              className="font-semibold"
+                            >
                               Only {product.stock} left!
                             </Badge>
                           </div>
@@ -231,13 +245,23 @@ const fetchProducts = async () => {
                               ${product.price.toFixed(2)}
                             </p>
                           </div>
-                          <Button
-                            size="sm"
-                            className="bg-primary hover:bg-primary/90 shadow-md"
-                          >
-                            <ShoppingCart className="w-4 h-4 mr-1" />
-                            Add
-                          </Button>
+                          <div className="flex flex-col gap-2">
+                            <Button
+                              size="sm"
+                              className="bg-primary hover:bg-primary/90 shadow-md"
+                            >
+                              <ShoppingCart className="w-4 h-4 mr-1" />
+                              Add
+                            </Button>
+
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setChatProduct(product)}
+                            >
+                              💬 Chat
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     </Card>
@@ -259,7 +283,9 @@ const fetchProducts = async () => {
                         (page) => (
                           <Button
                             key={page}
-                            variant={currentPage === page ? "default" : "outline"}
+                            variant={
+                              currentPage === page ? "default" : "outline"
+                            }
                             onClick={() => setCurrentPage(page)}
                             className="w-10"
                           >
@@ -284,7 +310,16 @@ const fetchProducts = async () => {
           </div>
         </div>
       </div>
+      {chatProduct && (
+  <ChatModal
+    isOpen={!!chatProduct}
+    onClose={() => setChatProduct(null)}
+    product={chatProduct}
+  />
+)}
+
     </section>
+    
   );
 };
 

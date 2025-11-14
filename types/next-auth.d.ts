@@ -1,11 +1,23 @@
 // types/next-auth.d.ts
 import NextAuth from "next-auth";
+import { Server } from "socket.io";
+import { NextApiResponse } from "next";
 
+// Socket.IO type for Next.js API routes
+export type NextApiResponseServerIO = NextApiResponse & {
+  socket: {
+    server: {
+      io?: Server;
+    };
+  };
+};
+
+// Extend NextAuth session and user types
 declare module "next-auth" {
   interface Session {
     user: {
       restaurant_id: string;
-      name: any;
+      name: string;
       phoneNumber: string;
       companyName: string;
       address: string;
@@ -28,6 +40,7 @@ declare module "next-auth" {
   }
 }
 
+// Extend NextAuth JWT types
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
@@ -36,9 +49,10 @@ declare module "next-auth/jwt" {
     last_name: string;
     role: string;
   }
-  declare module "*.json" {
-  const value: any;
-  export default value;
 }
 
+// Allow importing JSON files
+declare module "*.json" {
+  const value: any;
+  export default value;
 }
