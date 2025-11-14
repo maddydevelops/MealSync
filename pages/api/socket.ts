@@ -1,43 +1,45 @@
-import { NextApiResponseServerIO } from "@/types/next-auth";
+import { Server, Socket } from "socket.io";
 import { NextApiRequest } from "next";
-import { Server as ServerIO } from "socket.io";
-import {prisma} from "@/lib/prisma";
+import { NextApiResponseServerIO } from "@/types/next-auth"; // your extended type
+import axios from "axios";
+
+export const config = { api: { bodyParser: false } };
+
+let io: Server;
 
 export default function handler(req: NextApiRequest, res: NextApiResponseServerIO) {
   if (!res.socket.server.io) {
-    const io = new ServerIO(res.socket.server as any, {
-      path: "/api/socket",
-    });
-
-    io.on("connection", (socket) => {
-      console.log("Client connected:", socket.id);
-
-      // JOIN A CHAT ROOM
-      socket.on("joinRoom", (chatId) => {
-        socket.join(chatId);
-        console.log("User joined room:", chatId);
-      });
-
-      // SEND MESSAGE
-      socket.on("sendMessage", async (data) => {
-        const { chatId, message, sender, time } = data;
-
-        // 🔥 Save message to database
-        await prisma.chatMessage.create({
-          data: {
-            chatId,
-            message,
-            sender,
-          },
-        });
-
-        // Broadcast to everyone in the room
-        io.to(chatId).emit("receiveMessage", data);
-      });
-    });
-
+    io = new Server(res.socket.server as any, { path: "/api/socket", cors: { origin: "*" } });
     res.socket.server.io = io;
-    console.log("Socket.IO initialized");
+
+    io.on("connection", (socket: Socket) => {
+      console.log("Socket connected: " + socket.id);
+
+      // Join a chat room (user or admin)
+      socket.on("joinRoom", (chatId: string) => socket.join(chatId));
+
+      // Admin joins admin-room
+      socket.on("joinAdminRoom", () => socket.join("admin-room"));
+
+      // Send a message
+      socket.on("sendMessage", async (msgData: any) => {
+        try {
+          // Save message via API
+          await axios.post(
+            `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/owner/chat/send`,
+            msgData
+          );
+
+          // Emit to all clients in the chat room (including admin if joined)
+          io.in(msgData.chatId).emit("receiveMessage", msgData);
+
+          // Notify admins in admin-room if not in this chat
+          io.to("admin-room").emit("newMessageNotification", msgData);
+        } catch (err) {
+          console.log("Error saving message:", err);
+        }
+      });
+    });
   }
 
   res.end();

@@ -18,7 +18,7 @@ export default withAuth(
     // }
 
     // Superadmin route protection
-    if (pathname.startsWith("/dashboard") || pathname.startsWith("/users") || pathname.startsWith("/restaurants") || pathname.startsWith("/announcement") || pathname.startsWith("/payments") || pathname.startsWith("/subscriptions") || pathname.startsWith("/settings")) {
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/users") || pathname.startsWith("/restaurants") || pathname.startsWith("/announcement") || pathname.startsWith("/chats") || pathname.startsWith("/subscriptions") || pathname.startsWith("/settings")) {
       if (role !== "superadmin") return NextResponse.redirect(new URL("/owner/dashboard", req.url));
     }
 

@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import axios from "axios";
 
 let socket: any = null;
-
 const getSocket = () => {
   if (!socket) {
     socket = io("/", {
@@ -27,25 +27,26 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
 
   const socket = getSocket();
 
-  // Attach socket listener once
+  // Listen to incoming messages for this chat
   useEffect(() => {
     socket.on("receiveMessage", (msg: any) => {
-      setMessages((prev) => [...prev, msg]);
+      if (msg.chatId === chatId) {
+        setMessages((prev) => [...prev, msg]);
+      }
     });
 
-    return () => {
-      socket.off("receiveMessage");
-    };
-  }, [socket]);
+    return () => socket.off("receiveMessage");
+  }, [chatId]);
 
-  // Scroll chat to bottom
+  // Scroll to bottom when messages update
   useEffect(() => {
     if (chatBoxRef.current) {
       chatBoxRef.current.scrollTop = chatBoxRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const startChat = () => {
+  // Start chat
+  const startChat = async () => {
     if (!user.name || !user.email) return;
 
     const generatedChatId = `${product.id}-${user.email}`;
@@ -53,25 +54,44 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
 
     socket.emit("joinRoom", generatedChatId);
     setStep("chat");
+
+    // Load previous messages from DB
+    try {
+      const res = await axios.get(`/api/owner/chat/getMessages?chatId=${generatedChatId}`);
+      setMessages(res.data.messages || []);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
-  const sendMessage = () => {
+  // Send message
+  const sendMessage = async () => {
     if (!message.trim()) return;
 
     const msgData = {
       chatId,
+      sender: "user",
+      content: message, // Prisma expects "content"
       productId: product.id,
       productName: product.name,
       userName: user.name,
       email: user.email,
-      message,
-      sender: "user",
       time: new Date(),
     };
 
-    socket.emit("sendMessage", msgData);
-    setMessages((prev) => [...prev, msgData]);
-    setMessage("");
+    try {
+      // Save message to DB
+      await axios.post("/api/owner/chat/send", msgData);
+
+      // Emit via Socket.IO
+      socket.emit("sendMessage", msgData);
+
+      // Update local state
+      setMessages((prev) => [...prev, msgData]);
+      setMessage("");
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   if (!isOpen) return null;
@@ -79,7 +99,7 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 animate-fade-up">
       <div className="bg-card text-card-foreground p-6 rounded-2xl w-full max-w-md shadow-xl border border-border animate-zoom-slow">
-        {/* Close */}
+        {/* Close button */}
         <div className="flex justify-end">
           <button
             onClick={onClose}
@@ -89,13 +109,12 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
           </button>
         </div>
 
-        {/* ---------------- USER INFO STEP ---------------- */}
+        {/* User Info Step */}
         {step === "user" && (
           <>
             <h2 className="text-2xl font-bold mb-6 text-primary-foreground text-gradient">
               Chat About {product.name}
             </h2>
-
             <Input
               placeholder="Your Name"
               className="mb-3 border-border focus:border-primary focus:ring-primary rounded-lg"
@@ -108,7 +127,6 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
               value={user.email}
               onChange={(e) => setUser({ ...user, email: e.target.value })}
             />
-
             <Button
               className="w-full bg-primary text-primary-foreground hover:bg-primary-foreground hover:text-primary transition-all animate-bounce-slow"
               onClick={startChat}
@@ -118,13 +136,12 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
           </>
         )}
 
-        {/* ---------------- CHAT STEP ---------------- */}
+        {/* Chat Step */}
         {step === "chat" && (
           <>
             <h2 className="text-xl font-bold mb-4 text-primary-foreground text-gradient">
               Chat about: {product.name}
             </h2>
-
             <div
               ref={chatBoxRef}
               className="h-64 overflow-y-auto border border-border p-3 rounded-xl bg-background"
@@ -138,14 +155,13 @@ export default function ChatModal({ isOpen, onClose, product }: any) {
                       : "bg-muted text-muted-foreground animate-slide-left"
                   }`}
                 >
-                  <p className="text-sm">{m.message}</p>
+                  <p className="text-sm">{m.content}</p>
                   <p className="text-xs mt-1 text-muted-foreground text-right">
                     {new Date(m.time).toLocaleTimeString()}
                   </p>
                 </div>
               ))}
             </div>
-
             <div className="flex gap-2 mt-3">
               <Input
                 placeholder="Type message..."
