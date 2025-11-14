@@ -14,10 +14,9 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // Fetch user along with their restaurants
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
-          include: { restaurants: true }, // fetch restaurants owned by user
+          include: { restaurants: true },
         });
 
         if (!user || !user.is_active || user.is_blocked) return null;
@@ -25,7 +24,6 @@ export const authOptions: NextAuthOptions = {
         const isValid = await bcrypt.compare(credentials.password, user.password);
         if (!isValid) return null;
 
-        // Pick the first restaurant ID if exists
         const restaurant_id = user.restaurants[0]?.id ?? null;
 
         return {
@@ -38,12 +36,26 @@ export const authOptions: NextAuthOptions = {
           address: user.address,
           cnic: user.cnic,
           shopLocation: user.address,
-          restaurant_id, // <-- added restaurant_id
+          restaurant_id,
         };
       },
     }),
   ],
-  session: { strategy: "jwt" },
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  cookies: {
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      },
+    },
+  },
   pages: { signIn: "/login" },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
@@ -59,7 +71,7 @@ export const authOptions: NextAuthOptions = {
         token.address = u.address ?? "";
         token.cnic = u.cnic ?? "";
         token.shopLocation = u.shopLocation ?? "";
-        token.restaurant_id = u.restaurant_id ?? null; // <-- added
+        token.restaurant_id = u.restaurant_id ?? null;
       }
       return token;
     },
@@ -77,7 +89,7 @@ export const authOptions: NextAuthOptions = {
           address: (token.address as string) ?? "",
           cnic: (token.cnic as string) ?? "",
           shopLocation: (token.shopLocation as string) ?? "",
-          restaurant_id: (token.restaurant_id as string) ?? "", // <-- now available
+          restaurant_id: (token.restaurant_id as string) ?? "",
         };
       }
       return session;

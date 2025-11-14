@@ -43,16 +43,20 @@ const ProductsSection: React.FC = () => {
   };
 
   // Fetch products
-  const fetchProducts = async () => {
-    try {
-      const res = await axios.post("/api/owner/products/fetchproducts");
-      const availableProducts = res.data.filter((p: Product) => p.is_available);
+// Fetch products
+const fetchProducts = async () => {
+  try {
+    const res = await axios.get("/api/landingpage/fetchproducts"); // GET request
+    if (res.data.success) {
+      const availableProducts = res.data.products.filter((p: Product) => p.is_available);
       setProducts(availableProducts);
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to load products");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    toast.error("Failed to load products");
+  }
+};
+
 
   useEffect(() => {
     fetchCategories();
