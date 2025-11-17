@@ -19,7 +19,7 @@ declare module "next-auth" {
       restaurant_id: string;
       name: string;
       phoneNumber: string;
-      companyName: string;
+      company_name: string;
       address: string;
       cnic: string;
       shopLocation: string;

@@ -55,7 +55,7 @@ type User = {
   lastName: string;
   email: string;
   password?: string;
-  companyName?: string;
+  company_name?: string;
   subscription?: { id: string; name: string } | null;
   cnic?: string;
   address?: string;
@@ -109,7 +109,7 @@ export default function UsersPage() {
           lastName: editingUser.lastName || "",
           email: editingUser.email || "",
           password: "",
-          companyName: editingUser.companyName || "",
+          company_name: editingUser.company_name || "",
           subscription: editingUser.subscription || null,
           cnic: editingUser.cnic || "",
           address: editingUser.address || "",
@@ -121,7 +121,7 @@ export default function UsersPage() {
           lastName: "",
           email: "",
           password: "",
-          companyName: "",
+          company_name: "",
           subscription: null,
           cnic: "",
           address: "",
@@ -135,7 +135,7 @@ export default function UsersPage() {
       password: editingUser
         ? Yup.string()
         : Yup.string().required("Password is required"),
-      companyName: Yup.string().required("Company name is required"),
+      company_name: Yup.string().required("Company name is required"),
       subscription: Yup.object().nullable().required("Select a subscription"),
       phoneNumber: Yup.string().required("Phone number is required"),
     }),
@@ -173,7 +173,7 @@ export default function UsersPage() {
             phone_number: values.phoneNumber,
             address: values.address,
             city: values.shopLocation,
-            company_name: values.companyName,
+            company_name: values.company_name,
             cnic: values.cnic,
             subscription_id: values.subscription?.id,
             role: "owner",
@@ -367,16 +367,16 @@ export default function UsersPage() {
                   <div>
                     <Label>Company Name</Label>
                     <Input
-                      name="companyName"
-                      value={formik.values.companyName}
+                      name="company_name"
+                      value={formik.values.company_name}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       className="bg-input text-foreground"
                     />
-                    {formik.touched.companyName &&
-                      formik.errors.companyName && (
+                    {formik.touched.company_name &&
+                      formik.errors.company_name && (
                         <p className="text-red-500 text-sm">
-                          {formik.errors.companyName}
+                          {formik.errors.company_name}
                         </p>
                       )}
                   </div>
@@ -476,7 +476,7 @@ export default function UsersPage() {
                         {user.firstName} {user.lastName}
                       </td>
                       <td className="p-2">{user.email}</td>
-                      <td className="p-2">{user.companyName}</td>
+                      <td className="p-2">{user.company_name}</td>
                       <td className="p-2">{user.subscription?.name || ""}</td>
                       <td className="p-2">{user.cnic}</td>
                       <td className="p-2">{user.phoneNumber}</td>

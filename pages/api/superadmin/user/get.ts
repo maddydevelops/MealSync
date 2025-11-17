@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       lastName: u.last_name || "",
       email: u.email || "",
       password: u.password || "",
-      companyName: u.company_name || "",
+      company_name: u.company_name || "",
       subscription: u.owned_subscription ? { id: u.owned_subscription.id, name: u.owned_subscription.name } : null,
       cnic: u.cnic || "",
       address: u.address || "",

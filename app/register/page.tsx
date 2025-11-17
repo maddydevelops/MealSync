@@ -30,7 +30,7 @@ const RegisterSchema = Yup.object().shape({
   phoneNumber: Yup.string()
     .required("Phone number is required")
     .matches(/^\d+$/, "Phone number must be a number"),
-  companyName: Yup.string().required("Company name is required"),
+  company_name: Yup.string().required("Company name is required"),
   cnic: Yup.string(),
   address: Yup.string(),
   shopLocation: Yup.string().required("Shop Location is required"),
@@ -61,7 +61,7 @@ export default function RegisterPage() {
     email: string;
     password: string;
     phoneNumber: string;
-    companyName: string;
+    company_name: string;
     cnic: string;
     address: string;
     shopLocation: string;
@@ -73,7 +73,7 @@ export default function RegisterPage() {
       email: "",
       password: "",
       phoneNumber: "",
-      companyName: "",
+      company_name: "",
       cnic: "",
       address: "",
       shopLocation: "",
@@ -97,7 +97,7 @@ export default function RegisterPage() {
           email: values.email,
           password: values.password,
           phone_number: values.phoneNumber,
-          company_name: values.companyName,
+          company_name: values.company_name,
           cnic: values.cnic,
           address: values.address,
           city: values.shopLocation,
@@ -221,14 +221,14 @@ export default function RegisterPage() {
           <div>
             <Label>Company Name</Label>
             <Input
-              name="companyName"
-              value={formik.values.companyName}
+              name="company_name"
+              value={formik.values.company_name}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               className="bg-input text-foreground px-3 py-2"
             />
-            {formik.touched.companyName && formik.errors.companyName && (
-              <p className="text-red-500 text-sm">{formik.errors.companyName}</p>
+            {formik.touched.company_name && formik.errors.company_name && (
+              <p className="text-red-500 text-sm">{formik.errors.company_name}</p>
             )}
           </div>
 
