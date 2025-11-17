@@ -25,7 +25,7 @@ const [form, setForm] = useState({
   last_name: session?.user?.last_name || "",
   email: session?.user?.email || "",
   phoneNumber: session?.user?.phoneNumber || "",
-  companyName: session?.user?.companyName || "",
+  company_name: session?.user?.company_name || "",
   address: session?.user?.address || "",
   cnic: session?.user?.cnic || "",
   shopLocation: session?.user?.shopLocation || "",
@@ -56,7 +56,7 @@ const [form, setForm] = useState({
           <p><strong>Name:</strong> {session.user.first_name} {session.user.last_name}</p>
           <p><strong>Email:</strong> {session.user.email}</p>
           <p><strong>Phone:</strong> {session.user.phoneNumber || "-"}</p>
-          <p><strong>Company:</strong> {session.user.companyName || "-"}</p>
+          <p><strong>Company:</strong> {session.user.company_name || "-"}</p>
           <p><strong>Address:</strong> {session.user.address || "-"}</p>
           <p><strong>CNIC:</strong> {session.user.cnic || "-"}</p>
           <p><strong>City/Shop Location:</strong> {session.user.shopLocation || "-"}</p>
@@ -110,8 +110,8 @@ const [form, setForm] = useState({
                 <div>
                   <Label>Company</Label>
                   <Input
-                    value={form.companyName}
-                    onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+                    value={form.company_name}
+                    onChange={(e) => setForm({ ...form, company_name: e.target.value })}
                   />
                 </div>
                 <div>

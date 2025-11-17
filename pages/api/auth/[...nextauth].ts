@@ -85,7 +85,7 @@ export const authOptions: NextAuthOptions = {
           role: token.role as string,
           name: `${token.first_name ?? ""} ${token.last_name ?? ""}`,
           phoneNumber: (token.phoneNumber as string) ?? "",
-          companyName: (token.company_name as string) ?? "",
+          company_name: (token.company_name as string) ?? "",
           address: (token.address as string) ?? "",
           cnic: (token.cnic as string) ?? "",
           shopLocation: (token.shopLocation as string) ?? "",
