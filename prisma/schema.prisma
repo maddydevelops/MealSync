@@ -222,6 +222,7 @@ model Chat {
   userEmail    String
   createdAt    DateTime  @default(now())
   messages     Message[]
+  is_deleted  Boolean  @default(false)
 }
 
 model Message {
@@ -233,6 +234,7 @@ model Message {
   chat      Chat     @relation(fields: [chatId], references: [id])
     productId   String?   // add this
   productName String?
+  is_deleted  Boolean  @default(false)
 }
 model ChatSession {
   id           String   @id @default(uuid())
@@ -244,6 +246,7 @@ model ChatSession {
   createdAt    DateTime @default(now())
 
   messages     ChatMessage[]
+  is_deleted  Boolean  @default(false)
 }
 
 model ChatMessage {
@@ -254,6 +257,7 @@ model ChatMessage {
   timestamp   DateTime @default(now())
 
   chatSessions ChatSession[]
+  is_deleted  Boolean  @default(false)
 }
 
 

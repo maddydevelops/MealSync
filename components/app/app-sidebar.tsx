@@ -106,8 +106,8 @@ export function AppSidebar() {
     fetchNotifications();
 
     // Polling every 15s (or use WebSocket for real-time)
-    const interval = setInterval(fetchNotifications, 15000);
-    return () => clearInterval(interval);
+    // const interval = setInterval(fetchNotifications, 15000);
+    // return () => clearInterval(interval);
   }, []);
 
   if (status === "loading") return null;
