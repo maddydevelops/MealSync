@@ -222,18 +222,19 @@ model Chat {
   userEmail    String
   createdAt    DateTime  @default(now())
   messages     Message[]
-  is_deleted  Boolean  @default(false)
+  is_deleted   Boolean   @default(false)
+  read         Boolean   @default(false) // mark read support
 }
 
 model Message {
-  id        String   @id @default(uuid())
-  chatId    String
-  sender    String   // 'user' or 'restaurant'
-  content   String
-  createdAt DateTime @default(now())
-  chat      Chat     @relation(fields: [chatId], references: [id])
-    productId   String?   // add this
-  productName String?
+  id          String   @id @default(uuid())
+  chatId      String
+  sender      String   // 'user' or 'restaurant'
+  content     String
+  createdAt   DateTime @default(now())
+  chat        Chat     @relation(fields: [chatId], references: [id])
+  productId   String?  // optional reference to product
+  productName String?  // optional reference to product
   is_deleted  Boolean  @default(false)
 }
 model ChatSession {

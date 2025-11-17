@@ -3,47 +3,55 @@ import { prisma } from "@/lib/prisma";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === "POST") {
-    try {
-      const { chatId, sender, content, productId, productName, userName, email } = req.body;
+  if (req.method !== "POST") {
+    return res.status(405).json({ success: false, error: "Method not allowed" });
+  }
 
-      if (!content || !chatId || !sender) {
-        return res.status(400).json({ success: false, error: "Missing required fields" });
-      }
+  try {
+    const { chatId, sender, content, productId, productName, userName, email } = req.body;
 
-      // Check if Chat exists
-      let chat = await prisma.chat.findUnique({ where: { id: chatId } });
+    if (!content || !chatId || !sender) {
+      return res.status(400).json({ success: false, error: "Missing required fields" });
+    }
 
-      // If not, create it
-      if (!chat) {
-        chat = await prisma.chat.create({
-          data: {
-            id: chatId,
-            productId,
-            productName,
-            restaurantId: "restaurant-id-placeholder", // <-- Replace with actual restaurant id
-            userName,
-            userEmail: email,
-          },
+    // Check if chat exists
+    let chat = await prisma.chat.findUnique({ where: { id: chatId } });
+
+    if (chat) {
+      // If chat was deleted, restore it
+      if (chat.is_deleted) {
+        chat = await prisma.chat.update({
+          where: { id: chatId },
+          data: { is_deleted: false },
         });
       }
-
-      // Now create the message
-      const saved = await prisma.message.create({
+    } else {
+      // If not, create new chat
+      chat = await prisma.chat.create({
         data: {
-          chatId,
-          sender,
-          content,
-          createdAt: new Date(),
+          id: chatId,
+          productId,
+          productName,
+          restaurantId: "restaurant-id-placeholder", // Replace with actual restaurant id
+          userName,
+          userEmail: email,
         },
       });
-
-      res.status(200).json({ success: true, message: saved });
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ success: false, error: err });
     }
-  } else {
-    res.status(405).json({ success: false, error: "Method not allowed" });
+
+    // Create message
+    const saved = await prisma.message.create({
+      data: {
+        chatId,
+        sender,
+        content,
+        createdAt: new Date(),
+      },
+    });
+
+    res.status(200).json({ success: true, message: saved });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, error: err });
   }
 }
