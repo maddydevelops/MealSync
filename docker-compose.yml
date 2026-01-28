@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mealsync-master:
     build:
@@ -8,12 +6,18 @@ services:
     container_name: mealsync-master
     ports:
       - "3024:3024"
-    env_file:
-      - .env
     environment:
       - NODE_ENV=production
       - PORT=3024
       - HOSTNAME=0.0.0.0
+      - DATABASE_URL=postgres://db_postgres:db_postgres@192.168.194.202:5440/mealsync?schema=public
+      - NEXTAUTH_URL=http://localhost:3000
+      - NEXT_PUBLIC_DIR=https://image.$$NEXT_PUBLIC_URL/mealsync/
+      - NEXT_PUBLIC_SHARED_IMG_DIR=/var/www/public/mealsync
+      - NEXTAUTH_SECRET=dnGcDX52uarz2NaJArIpZJUqB0vw1ap3I4dr4wAsEgA=
+      - NEXT_PRIVATE_STANDALONE=true
+      - ENV=master
+      - DOCKER_NAME=mealsync-master
     restart: unless-stopped
     networks:
       - mealsync-network

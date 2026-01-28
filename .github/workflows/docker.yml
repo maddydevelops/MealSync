@@ -14,5 +14,8 @@ jobs:
     - name: Build Docker Image
       run: docker build -t mealsync:latest .
     
+    - name: Run Docker Compose
+      run: docker compose up -d
+    
     - name: Success
-      run: echo "✅ Build successful!"
+      run: echo "✅ Build and deployment successful!"
